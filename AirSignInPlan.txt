@@ -1,0 +1,41 @@
+Server:
+init:
+setup sq1ite database with basic table with the same fields as the desired google form
+
+
+process - Database Management:
+Connects to google form storage via google api
+Requests copy of form results (probably most recent)
+compares results with database - only entries with mac address
+add new results to database
+
+
+process - handle request:
+receive requests - requests will contain mac addresses and MAYBE timestamps -- if multiple requests are accepted there will need to be a timer so that google form is not filled out multiple times in quick succession
+if mac address in request exists in database, get information from that record and submit google form request with the information stored in that record
+
+
+
+
+Pi:
+init:
+set up kerberos server and kerberos service
+set up service for main process
+set up network tethering service
+
+
+process - kerberos:
+kerberos server
+
+
+process - network tethering service:
+Use a usb connection || ethernet connection to route traffic from the pi through a connected computer. 
+
+
+process - send request:
+gather and format mac addresses gathered by kerberos server
+make request to server at set intervals with gathered mac addresses
+
+
+
+
