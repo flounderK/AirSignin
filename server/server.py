@@ -7,7 +7,7 @@ from oauth2client import file, client, tools
 import google
 
 import google_auth_oauthlib.flow
-
+from DataBaseMgmt import DBManager
 
 def get_sheet(creds, sheet_id):
     """Uses the google sheets api to pull down the full sheet"""
@@ -58,5 +58,11 @@ def main():
     sheet = get_sheet(creds, sheet_id)
     # Remove duplicate entries
     sheet = list(set(sheet))
+    db_mgr = DBManager()
+    for record in sheet:
+        db_mgr.insert_record("TempData", record)
 
+
+if __name__ == "__main__":
+    main()
 
