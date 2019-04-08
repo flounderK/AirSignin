@@ -61,6 +61,7 @@ class DBManager:
                   VALUES(?,?,?,?);""", *args)
         c.close()
 
+
     @connect
     def update_record(self, table_name, *args):
         """Update records based on M Numbers, as that should never change"""
@@ -76,10 +77,14 @@ class DBManager:
         c.close()
 
     # joins should use mac address because that can be updated later
-    # Get entries where Mac Addresses Match
+    # Get entries where Mac Addresses Match, for updating records.
     """SELECT fd.FirstName,fd.LastName,fd.MNumber,fd.MacAddress 
        FROM FormData AS fd 
        LEFT JOIN TempData AS td 
        ON fd.MacAddress = td.MacAddress;"""
 
+    # Get record for auto-form fill
+    """SELECT FirstName, LastName, MNumber, MacAddress
+       FROM FormData 
+       WHERE MacAddress = ?;"""
 

@@ -5,9 +5,11 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from oauth2client import file, client, tools
 import google
-
 import google_auth_oauthlib.flow
 from DataBaseMgmt import DBManager
+from flask import Flask, request
+
+app = Flask(__name__)
 
 def get_sheet(creds, sheet_id):
     """Uses the google sheets api to pull down the full sheet"""
@@ -30,7 +32,8 @@ def get_sheet(creds, sheet_id):
 
 
 def make_creds():
-    """Need to automate this"""
+    """Need to automate this, but this is the basis for creating credentials to interact with the
+    google sheets api"""
     # https://developers.google.com/sheets/api/quickstart/python
     scopes = "https://www.googleapis.com/auth/spreadsheets"
     # flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file("credentials.json", scopes=scopes)
@@ -40,9 +43,12 @@ def make_creds():
     # Save the credentials for the next run
     with open('token.pickle', 'wb') as token:
         pickle.dump(creds, token)
+    return creds
 
 
-def main():
+def get_new_entries():
+    """Gets all of the entries from the spreadsheet so that any new manually entered entries
+    can be added to the database"""
     sheet_id = None
     creds = None
 
@@ -63,6 +69,15 @@ def main():
         db_mgr.insert_record("TempData", record)
 
 
+@app.route("/", methods=['POST'])
+def receive_data():
+    """Meant to handle posts of the form:
+    requests.post("http://127.0.0.1:5000/", json={"mac_addresses": ["00:11:22:33:44:55", "00:11:22:33:44:55"]})"""
+    mac_addresses = request.json
+    # store mac addresses
+    return "OK"
+
+
 if __name__ == "__main__":
-    main()
+    app.run()
 
