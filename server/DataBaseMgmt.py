@@ -1,6 +1,8 @@
 import sqlite3
 import os
 
+# TODO: Fix horrible injection vulns...
+
 
 class IncorrectArgs(Exception):
     pass
@@ -59,16 +61,16 @@ class DBManager:
             raise IncorrectArgs
 
         c = self.conn.cursor()
-        c.execute("""INSERT INTO 
-                  ?(FirstName, LastName, MNumber, MacAddress)
-                  VALUES(?,?,?,?);""", table_name, *args)
+        c.execute(f"""INSERT INTO 
+                  {table_name}(FirstName, LastName, MNumber, MacAddress)
+                  VALUES(?,?,?,?);""", *args)
         c.close()
 
 
     @connect
     def update_record(self, table_name, *args):
         """Update records based on M Numbers, as that should never change"""
-        sql = """UPDATE ?
+        sql = f"""UPDATE {table_name}
                    SET 
                    FirstName = ?,
                    LastName = ?,
@@ -76,7 +78,7 @@ class DBManager:
                    MacAddress = ?
                    WHERE MNumber = ?;"""
         c = self.conn.cursor()
-        c.execute(sql, table_name, *args, args[2])
+        c.execute(sql, *args, args[2])
         c.close()
 
     @connect
@@ -95,9 +97,9 @@ class DBManager:
     @connect
     def clear_table(self, table_name):
         """Some tables like TodaysMacAddresses will need to be cleared out on a regular basis"""
-        sql = """DELETE FROM ?;"""
+        sql = f"""DELETE FROM {table_name};"""
         c = self.conn.cursor()
-        c.execute(sql, table_name)
+        c.execute(sql)
         c.close()
 
     @connect
