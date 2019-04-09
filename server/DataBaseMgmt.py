@@ -47,6 +47,9 @@ class DBManager:
                      LastName text,
                      MNumber text,
                      MacAddress text);""")
+        c.execute("""CREATE TABLE TodaysMacAddresses
+                     (AddressID INTEGER PRIMARY KEY AUTOINCREMENT,
+                     MacAddress text);""")
         c.close()
 
 
@@ -56,16 +59,16 @@ class DBManager:
             raise IncorrectArgs
 
         c = self.conn.cursor()
-        c.execute(f"""INSERT INTO 
-                  {table_name}(FirstName, LastName, MNumber, MacAddress)
-                  VALUES(?,?,?,?);""", *args)
+        c.execute("""INSERT INTO 
+                  ?(FirstName, LastName, MNumber, MacAddress)
+                  VALUES(?,?,?,?);""", table_name, *args)
         c.close()
 
 
     @connect
     def update_record(self, table_name, *args):
         """Update records based on M Numbers, as that should never change"""
-        sql = f"""UPDATE {table_name}
+        sql = """UPDATE ?
                    SET 
                    FirstName = ?,
                    LastName = ?,
@@ -73,7 +76,36 @@ class DBManager:
                    MacAddress = ?
                    WHERE MNumber = ?;"""
         c = self.conn.cursor()
-        c.execute(sql, *args, args[2])
+        c.execute(sql, table_name, *args, args[2])
+        c.close()
+
+    @connect
+    def get_form_data_to_send(self):
+        """Get records for auto-form fill"""
+        sql = """SELECT FirstName, LastName, MNumber, MacAddress
+                     FROM FormData 
+                     WHERE MacAddress IN (SELECT MacAddress FROM TodaysMacAddresses);"""
+        c = self.conn.cursor()
+        c.execute(sql)
+        results = c.fetchall()
+        c.close()
+
+        return results
+
+    @connect
+    def clear_table(self, table_name):
+        """Some tables like TodaysMacAddresses will need to be cleared out on a regular basis"""
+        sql = """DELETE FROM ?;"""
+        c = self.conn.cursor()
+        c.execute(sql, table_name)
+        c.close()
+
+    @connect
+    def insert_mac_addresses(self, mac_addresses: list):
+        sql = """INSERT INTO TodaysMacAddresses(MacAddress) VALUES(?);"""
+        c = self.conn.cursor()
+        for mac_address in mac_addresses:
+            c.execute(sql, mac_address)
         c.close()
 
     # joins should use mac address because that can be updated later
@@ -83,8 +115,5 @@ class DBManager:
        LEFT JOIN TempData AS td 
        ON fd.MacAddress = td.MacAddress;"""
 
-    # Get record for auto-form fill
-    """SELECT FirstName, LastName, MNumber, MacAddress
-       FROM FormData 
-       WHERE MacAddress = ?;"""
+
 
